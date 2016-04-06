@@ -4,6 +4,8 @@ public class Order implements Anonymous {
 	private String id; 
 	private double price;
 	
+	Order next; 
+	Order prev;
 	
 	public Order(String id, double price, int volume){
 		this.volume = volume; 
@@ -42,26 +44,11 @@ public class Order implements Anonymous {
 	}
 	
 	public String toString(){
-		return(" " + Math.abs(this.price)+ " " + this.volume);
+		return(" " +this.price+ " " + this.volume);
 	}
 	
 	
 	public String printFullDetails(){
-		return   " " + id + " " + Math.abs(price) + " " + volume;
+		return   " " + id + " " + price + " " + volume;
 	}
-	
-	/*If the volume of instance variable is smaller than 
-	 * the volume of the order at a particular index
-	 * the volume of instance variable is decremented by 
-	 * the volume of order at a particular index
-	 */
-	public boolean subVolume(int volumeAtIndex){
-		if(this.volume >= volumeAtIndex){
-			this.volume = this.volume - volumeAtIndex;
-			return true;
-		}
-		else
-			return false; 
-	}
-	
 }

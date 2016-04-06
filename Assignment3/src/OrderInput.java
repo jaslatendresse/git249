@@ -183,7 +183,7 @@ public class OrderInput extends JFrame {
 				name.setText("Enter name here");
 				price.setText("Enter price here");
 				volume.setText("Enter volume here");
-				orderType.setText("Enter order type here");
+				orderType.setText("Enter order type here (bid/offer)");
 			}
 		}
 	}

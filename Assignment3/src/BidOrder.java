@@ -2,7 +2,7 @@
 public class BidOrder extends Order {
 
 	public BidOrder(String id, double price, int volume){
-		super(id, -price, volume);
+		super(id, price, volume);
 	}
 	
 	public BidOrder(){

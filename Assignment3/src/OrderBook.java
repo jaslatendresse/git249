@@ -1,242 +1,337 @@
-
 public class OrderBook {
 
-	private Node tail; 
-	private Node head; 
-	private int bestBidIndex;
-	private int bestOfferIndex;
-	
+	///---Instance variables of OrderBook class---///
+	private Node tail;
+	private Node head;
+	private Node bestOffer;
+	private Node bestBid;
+	int size; 
+
+	///---Default constructor---///
+	/*Initializes bestBid and bestOffer nodes to null
+	 * Creates new nodes for start and end of linked list
+	 * links head and tail*/
 	public OrderBook(){
-		this.bestBidIndex = 0; 
-		this.bestOfferIndex = 0; 
+		bestBid = null;
+		bestOffer = null; 
 		this.head = new Node(); 
 		this.tail = new Node(); 
-		this.head.next = this.tail; 
+		this.head.next = this.tail;
 		this.tail.prev = this.head; 
+		this.size = 0; 
 	}
-	
-	private int getSize(){
-		int size = -1; 
-		for(Node node = head; node.next!=null; node = node.next)
-			size++;
-		return size;
+
+	///---Checks if linked list is empty---///
+	private boolean isEmpty(){
+		return size == 0; 
 	}
-	
-	public boolean isEmpty(){
-		return getSize() == 0; 
+
+	///---Removes a node---///
+	private void remove(Node tmp){
+		tmp.prev.next = tmp.next; 
+		tmp.next.prev = tmp.prev;
 	}
-	
-	private Node getNode(int i){
-		i--;
-		int size = getSize(); 
-		if(i > size || i < 0){
-			throw new IndexOutOfBoundsException();
-		}
-		else{
-			Node node = head.getNext(); 
-			
-			for(int j = 0; j<i; j++){
-				node = node.getNext(); 
-			}
-			return node; 
-		}
-	}
-	
-	private Order get(int i){
-		return getNode(i+1).getOrder();
-	}
-	
-	/*Removes an order at specific index*/
-	private void remove(int index) {
-	   int size = getSize(); 
-	   Node temp; 
-       /*Checks if index is out of bounds*/
-	   if(index < 0 || index > size) {
-		   throw new IndexOutOfBoundsException(); 
-	   /* if index is not out of bounds, we create a node pointing
-	    * at this index and link the next and previous nodes together*/
-	   } else {
-		   temp = new Node(getNode(index+1));
-	       temp.getPrev().setNext(temp.next);
-	       temp.getNext().setPrev(temp.prev);
-	       }
-	   }
-	   
-	/*Adds an order at specific index*/
-	private void add(int index, Order o){
-		int size = getSize(); 
-		/*Checks if index is out of bounds*/
-		if(index < 0 || index > size){
-			throw new IndexOutOfBoundsException();
-		}
-		 /* If index is not out of bounds, create node at this index, link 
-		  * the previous node to next and stores the order in a node with 
-		  * its pointers*/
-		else{
-			Node next = getNode(index+1);
-			Node prev = next.getPrev(); 
-			Node temp = new Node(o, next, prev);
-			
-			prev.setNext(temp);
-			next.setPrev(temp);
-		}
-	}
-	
-	public boolean isBid(Order o){
-		if(o instanceof BidOrder){
-			return true; 
-		}
-		else
-			return false; 
-	}
-	
-	/*Adds the order and keeps the list sorted*/
+
+	///---Adds an order by keeping the list sorted from greater to smaller price---///
 	public void add(Order o){
-		
-		int size = getSize(); 
-		System.out.println("Adding > " + o.toString());
-		/*If list is empty, size is 0, then we add the order at the beginning*/
+		System.out.println("Adding " + o.toString() + "\n");
+		Node curr = head; 
+		Node n = new Node(); 
+		Node p = new Node(); 
+		Node tmp = new Node(o);
+
+		/*If list is empty, then tail and head are the same node.
+		 * Element is added in the list*/
 		if(isEmpty()){
-			add(size, o);
-		}
-		/*if price of order to be added is greater than price
-		 * of last order, we add the order at the end of the list*/
-		else if(o.getPrice() > get(size - 1).getPrice()){
-			add(size, o);
-		}
-		/* if price of order to be added is neither greater than last price
-		 * or list isn't empty, check if the price is smaller than every order
-		 * in the list and add it at the index it corresponds to*/
-		else{
-			for(int i = 0; i<size; i++){
-				if(o.getPrice() <= get(i).getPrice()){
-					add(i, o);
-					break; 
-				}
+			tail.prev = tmp;
+			head.next = tmp; 
+			tmp.prev = head; 
+			tmp.next = tail;
+
+			if(o instanceof BidOrder){
+				bestBid = tmp; 
+			}
+			else if(o instanceof OfferOrder){
+				bestOffer = tmp;
 			}
 		}
-		/*
-		 * if the order to be added is of type BidOrder, 
-		 * increment the index referencing to the bestOffer
-		 */
-		if(isBid(o)){
-			bestOfferIndex++;
-		}
-	}
-	
-	public String getLastOrderAdded(){
-		return get(getSize() - 1).toString();
-	}
-	
-	/*public boolean subVolume(int volumeAtIndex){
-		if(this.volume >= volumeAtIndex){
-			this.volume = this.volume - volumeAtIndex;
-			return true;
-		}
-		else
-			return false; 
-	}*/
-	/*Looks for a match*/
-	public void matchingEngine(){
-		int size = getSize(); 
-		System.out.println("------Matching------");
-		/*If there is only one item in the list, we can't match an order*/
-		if(size == 1){
-			System.out.println("There are not enough books to find a match.");
-		}
-		/*If the list is empty, there is nothing to be matched*/
-		if(isEmpty()){
-			System.out.println("There are no orders to match.");
-		}
-		
-		/*if not empty and contains more than 1 item*/
-		else{
-			/*loop through the list*/
-			for(int i = 0; i<size; i++){
-				/*If the order at index of bestBid had a price greater or equal to
-				 *an order at index bestOffer, then there is a match
-				 *Use of Math.abs - Constructor of BidOrder sets price to negative to
-				 *differentiate from OfferOrder in the list. For programmer use only*/
-				if(Math.abs(get(bestBidIndex).getPrice()) >= get(bestOfferIndex).getPrice()){
-					System.out.println();
-					System.out.println("Match found");
-					/*printing the full details of the bid and offer*/
-					System.out.println(get(bestBidIndex).printFullDetails());
-					System.out.println(get(bestOfferIndex).printFullDetails());
-					
-					
-					/*If the volume of order at bestOffer index is greater or equal to
-					 * volume of order at bestBid, then it can be subtracted*/
-					if(get(bestOfferIndex).subVolume(get(bestBidIndex).getVolume())){
-						/*If volume of order at index bestOffer is 0
-						 * the order is removed*/
-						if(get(bestOfferIndex).getVolume() == 0){
-							remove(bestOfferIndex);
+		///---Order to be added is of type OfferOrder---///
+		/*Keeps orders of type OfferOrder at top of the list
+		 * Keeps order of type BidOrder below offers*/
+		else if(o instanceof OfferOrder){
+			/*If bestOffer node is null and bestBid node isn't null
+			 * Then the offer is added before the bestBid*/
+			if(bestOffer == null && bestBid != null){
+				n = bestBid; 
+				p = bestBid.prev;
+				tmp.next = n; 
+				tmp.prev = p; 
+				n.prev = tmp; 
+				p.next = tmp;
+				bestOffer = tmp; 
+			}
+			/*If bestOffer node isn't null and the price of offer to be added is smaller than the order
+			 * in bestOffer node, then the order is added after the bestOffer node and becomes the best offer.
+			 */
+			else if(bestOffer != null&&o.getPrice()<bestOffer.order.getPrice()){
+				n = bestOffer.next; 
+				p = bestOffer;
+				tmp.next = n;
+				tmp.prev = p; 
+				n.prev = tmp; 
+				p.next = tmp; 
+				bestOffer = tmp; 
+			}
+			/*If order to be added has a higher price than the order in the bestOffer node, then it is added above the
+			 * bestOffer node.*/
+			else if(o.getPrice() > bestOffer.order.getPrice()){
+				curr = bestOffer;
+				while(true){
+					if(curr!=head){
+						if(curr.prev == head){
+							p = head; 
+							n = head.next;
+							tmp.next = n; 
+							tmp.prev = p; 
+							n.prev = tmp; 
+							p.next = tmp; 
+							break;
 						}
-						/*remove the order at best bid and decrement
-						 * the index*/
-						remove(bestBidIndex);
-						bestOfferIndex--;
+						/*if order to be added has a smaller price than offer, then it is added below*/
+						else if(o.getPrice()<curr.order.getPrice()){
+							p = curr; 
+							n = curr.next;
+							tmp.next = n; 
+							tmp.prev = p; 
+							n.prev = tmp; 
+							p.next = tmp;
+							break;
+						}
+						else{
+							curr = curr.prev;
+						}
 					}
-					/*otherwise, check if volume of order at bestBid is greater or equal
-					 * to volume of order at best offer and subtract it while it is.
-					 * Then remove the order at best Offer.*/
-					else{
-						get(bestBidIndex).subVolume(get(bestOfferIndex).getVolume());
-						remove(bestOfferIndex);
+				}
+
+			}
+		}
+		///---Order to be added is of type bid---///
+		else if(o instanceof BidOrder){
+			/*If bestBid node is null and bestOffer node isn't null
+			 * Then the offer is added before the bestBid*/
+			if(bestBid == null&&bestOffer != null){
+				p = bestOffer;
+				n = bestOffer.next;
+				tmp.next = n; 
+				tmp.prev = p; 
+				p.next = tmp; 
+				n.prev = tmp; 
+				bestBid = tmp; 
+			}
+			/*If bestBid node isn't null and the price of bid to be added is smaller than the order
+			 * in bestBid node, then the order is added above the bestBid node and becomes the best bid.
+			 */
+			else if(bestBid!=null && o.getPrice()>bestBid.order.getPrice()){
+				n = bestBid;
+				p = bestBid.prev;
+				tmp.next = n;
+				tmp.prev = p;
+				n.prev = tmp; 
+				p.next = tmp; 
+				bestBid = tmp; 
+			}
+			/*If bestBid node isn't empty and the order to be added has a lower price than the order in
+			 * the bestBid node, then it is added at the end of the list*/
+			else if(bestBid!=null && o.getPrice() < bestBid.order.getPrice()){
+				curr = bestBid;
+				while(true){
+					/*if order is bestBid node is not at tail*/
+					if(curr!=tail){
+						if(o.getPrice()>curr.order.getPrice()){
+							n = curr;
+							p = curr.prev;
+							tmp.next = n; 
+							tmp.prev = p; 
+							n.prev = tmp; 
+							n.next = tmp; 
+							break; 
+						}
+						/*If next node is the tail*/
+						else if(curr.next==tail){
+							n = tail; 
+							p = tail.prev;
+							tmp.next = n; 
+							tmp.prev = p; 
+							n.prev = tmp; 
+							p.next = tmp;
+							break;
+						}
+						else{
+							curr = curr.next; 
+						}
 					}
+					break;
 				}
 			}
 		}
+		///---When done adding process, increment the size of the list---///
+		size++;
 	}
-	
-	public String outputBook(){
-		int size = getSize(); 
-		String result = "";
-		System.out.println("------Orders------");
+
+	///---Matching engine---///
+	public void execute(Order o){
+		outputBBO();
+		System.out.println("------Matching process------");
+		System.out.println("Matching " + o.toString());
+		Node curr;//Node that contains the order to be matched
 		
-		for(int i = size - 1; i>=0;i--){
-			result+=(get(i).toString()) + "\n";	
+		///---Order is of type BidOrder---///
+		if(o instanceof BidOrder){
+			/*If the bestOffer node is null then we can't match a bid.
+			 * If the bid has a lower price than the offers, then no match can be found.
+			 * Adding the order to the list*/
+			if(bestOffer == null || o.getPrice()<bestOffer.order.getPrice()){
+				System.out.println("No match found. Bid is added to the book.");
+				add(o);
+			}
+			/*If price of bid is greater or equal to offer*/
+			else if(o.getPrice() >= bestOffer.order.getPrice()){
+				curr = bestOffer; 
+				while(true){
+					if(curr!=bestBid && curr!=head && curr!=tail){
+						if(curr.prev !=head && o.getPrice()>curr.order.getPrice()){
+							curr = curr.prev; 
+						}
+						/*Match is found if bid has a higher price than order*/
+						else{
+							System.out.println("Match found" + "\n" + o.printFullDetails() + "\n" + curr.order.printFullDetails());
+							/*if volume is entirely satisfied*/
+							if(o.getVolume() == curr.order.getVolume()){
+								remove(curr);
+								o.setVolume(0);
+								break; 
+							}
+							else if(o.getVolume() > curr.order.getVolume()){
+								remove(curr);
+								o.setVolume(o.getVolume() - curr.order.getVolume());//decrements volume while remaining in book
+								curr = curr.next; 
+							}
+							else if(o.getVolume()<curr.order.getVolume()){
+								curr.order.setVolume(curr.order.getVolume() - o.getVolume());
+							}
+						}
+					}
+				}
+				if(bestBid.prev == head){
+					bestOffer = null;
+				}
+				else{
+					bestOffer = bestBid.prev;
+				}
+				if(o.getVolume()!=0){
+					add(o);
+				}
+			}
 		}
-		return result;
-	}
-	
-	
-	public String outputBBO(){
-		System.out.println("------Best bid and offer------");
-		return get(bestBidIndex).toString() + "\n" + get(bestOfferIndex).toString();
-	}
-	
-	
-	/*Inner class Node*/
-	private class Node{
-		Order order; 
-		Node next; 
-		Node prev; 
 		
+		///---Order is of type OfferOrder---///
+		else if(o instanceof OfferOrder){
+			/*If there is no order in the best bid nodes or that the offer to be matched has a price greater than
+			 * an order of type bid, then there is no match*/
+			if(bestBid ==  null || o.getPrice()>bestBid.order.getPrice()){
+				System.out.println("No match found. Offer is added to the book.");
+				add(o);//Adding order when no match
+			}
+			/*if offer to be matched has a price less than or equal to than the best bid
+			 * check if it can be matched*/
+			else if(o.getPrice() <= bestBid.order.getPrice()){
+				curr = bestBid;
+				while(true){
+					if(curr != bestOffer && curr!=head && curr!=tail){
+						if(curr.next !=tail && o.getPrice()<curr.next.order.getPrice()){
+							curr = curr.next;
+						}
+						else{
+							/*If offer has a price smaller than bid, then a match is made*/
+							System.out.println("Match found " + "\n" + o.printFullDetails()+"\n" + curr.order.printFullDetails());
+							if(o.getVolume() == curr.order.getVolume()){//if volume is entirely satisfied
+								remove(curr);
+								o.setVolume(0);
+								break; 
+							}
+							else if(o.getVolume() > curr.order.getVolume()){
+								remove(curr);
+								o.setVolume(o.getVolume() - curr.order.getVolume());
+								curr = curr.prev;//keeps looking for match if volume is not satisfied.
+							}
+							/*If volume of offer is smaller than the match*/
+							else if(o.getVolume() < curr.order.getVolume()){
+								curr.order.setVolume(curr.order.getVolume() - o.getVolume());//decrements volume while remaining in the book
+								o.setVolume(0);
+								break; 
+							}
+						}
+					}
+				}
+				if(o.getVolume()!=0){
+					add(o);
+				}
+				if(bestOffer.next == tail){
+					bestBid = null; 
+				}
+				else{
+					bestBid = bestOffer.next; 
+				}
+			}
+		}
+		outputBook();
+	}///---End of matching---///
+
+	///---Outputs the best bid and best offer---///
+	public void outputBBO(){
+		System.out.println("------Best bid and best offer------");
+		if(bestBid == null){
+			System.out.println("Bid is null");
+		}
+		else{
+			System.out.println(bestBid.order.toString());
+		}
+		if(bestOffer == null ){
+			System.out.println("Offer is null \n");
+		}
+		else{
+			System.out.println(bestOffer.order.toString()+"\n");
+		}
+	}
+
+	///---Outputs the content of the list---///
+	public void outputBook(){
+		Node tmp = head.next;
+		System.out.println("------Orders------");
+		while(tmp.next!=null){
+			System.out.println(tmp.order.toString());
+			tmp = tmp.next;
+		}
+	}
+	
+	///---Inner Node class---///
+	private class Node{
+		public Order order; 
+		public Node next; 
+		public Node prev; 
+
+		///---Default constructor---///
 		public Node(){
-			this.order = null; 
-			this.next = null;
+			this.order = null;
+			this.next = null; 
 			this.prev = null; 
 		}
-		
-		public Node(Order order, Node next, Node prev){
-			this.prev = prev; 
-			this.next = next; 
-			this.order = order; 
-		}
-		
-		public Order getOrder(){return order;}
-		
-		public Node getNext(){return next;}
-		public void setNext(Node next){this.next = next;}
-		public void setPrev(Node prev){this.prev = prev;}
-		public Node getPrev(){return prev;}
-		
-		public Node(Node node){
-			this.next = node.next; 
-			this.prev = node.prev;
-			this.order = node.order;
+
+		///---Constructor to create a new Node containing an order---///
+		public Node(Order o){
+			this.order = o;
+			this.next = null;
+			this.prev = null; 
 		}
 	}
 }
