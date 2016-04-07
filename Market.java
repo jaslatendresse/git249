@@ -17,6 +17,9 @@ public class Market {
         book.execute(new OfferOrder("1", 152, 100));
  
         book.execute(new BidOrder("1", 147, 200));
+        
+        book.execute(new BidOrder("1", 220, 200));
+        
 
         OrderInput windowInput = new OrderInput();
 	   

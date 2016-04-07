@@ -40,62 +40,63 @@ public class OrderBook {
 			tmp.next = tail; 
 			bestOffer = tmp;
 		}
-		/*If bestOffer node is null and bestBid node isn't null
-		 * Then the offer is added before the bestBid*/
-		if(bestOffer == null && bestBid != null){
-			n = bestBid; 
-			p = bestBid.prev;
-			tmp.next = n; 
-			tmp.prev = p; 
-			n.prev = tmp; 
-			p.next = tmp;
-			bestOffer = tmp; 
-		}
-		/*If bestOffer node isn't null and the price of offer to be added is smaller than the order
-		 * in bestOffer node, then the order is added after the bestOffer node and becomes the best offer.
-		 */
-		else if(bestOffer != null&&o.getPrice()<bestOffer.order.getPrice()){
-			n = bestOffer.next; 
-			p = bestOffer;
-			tmp.next = n;
-			tmp.prev = p; 
-			n.prev = tmp; 
-			p.next = tmp; 
-			bestOffer = tmp; 
-		}
-		/*If order to be added has a higher price than the order in the bestOffer node, then it is added above the
-		 * bestOffer node.*/
-		else if(o.getPrice() > bestOffer.order.getPrice()){
-			currOff = bestOffer;
-			while(true){
-				if(currOff!=head){
-					if(currOff.prev == head){
-						p = head; 
-						n = head.next;
-						tmp.next = n; 
-						tmp.prev = p; 
-						n.prev = tmp; 
-						p.next = tmp; 
-						break;
-					}
-					/*if order to be added has a smaller price than offer, then it is added below*/
-					else if(o.getPrice()<currOff.order.getPrice()){
-						p = currOff; 
-						n = currOff.next;
-						tmp.next = n; 
-						tmp.prev = p; 
-						n.prev = tmp; 
-						p.next = tmp;
-						break;
-					}
-					else{
-						currOff = currOff.prev;
+		else{
+			/*If bestOffer node is null and bestBid node isn't null
+			 * Then the offer is added before the bestBid*/
+			if(bestOffer == null && bestBid != null){
+				n = bestBid; 
+				p = bestBid.prev;
+				tmp.next = n; 
+				tmp.prev = p; 
+				n.prev = tmp; 
+				p.next = tmp;
+				bestOffer = tmp; 
+			}
+			/*If bestOffer node isn't null and the price of offer to be added is smaller than the order
+			 * in bestOffer node, then the order is added after the bestOffer node and becomes the best offer.
+			 */
+			else if(bestOffer != null&&o.getPrice()<bestOffer.order.getPrice()){
+				n = bestOffer.next; 
+				p = bestOffer;
+				tmp.next = n;
+				tmp.prev = p; 
+				n.prev = tmp; 
+				p.next = tmp; 
+				bestOffer = tmp; 
+			}
+			/*If order to be added has a higher price than the order in the bestOffer node, then it is added above the
+			 * bestOffer node.*/
+			else if(o.getPrice() > bestOffer.order.getPrice()){
+				currOff = bestOffer;
+				while(true){
+					if(currOff!=head){
+						if(currOff.prev == head){
+							p = head; 
+							n = head.next;
+							tmp.next = n; 
+							tmp.prev = p; 
+							n.prev = tmp; 
+							p.next = tmp; 
+							break;
+						}
+						/*if order to be added has a smaller price than offer, then it is added below*/
+						else if(o.getPrice()<currOff.order.getPrice()){
+							p = currOff; 
+							n = currOff.next;
+							tmp.next = n; 
+							tmp.prev = p; 
+							n.prev = tmp; 
+							p.next = tmp;
+							break;
+						}
+						else{
+							currOff = currOff.prev;
+						}
 					}
 				}
 			}
 		}
 	}
-	
 	///---Adding a bid---///
 	public void addBid(Order o){
 		Node currBid = head; 
@@ -110,64 +111,65 @@ public class OrderBook {
 			tmp.next = tail; 
 			bestBid = tmp;
 		}
-		/*If bestBid node is null and bestOffer node isn't null
-		 * Then the offer is added before the bestBid*/
-		if(bestBid == null&&bestOffer != null){
-			p = bestOffer;
-			n = bestOffer.next;
-			tmp.next = n; 
-			tmp.prev = p; 
-			p.next = tmp; 
-			n.prev = tmp; 
-			bestBid = tmp; 
-		}
-		/*If bestBid node isn't null and the price of bid to be added is smaller than the order
-		 * in bestBid node, then the order is added above the bestBid node and becomes the best bid.
-		 */
-		else if(bestBid!=null && o.getPrice()>bestBid.order.getPrice()){
-			n = bestBid;
-			p = bestBid.prev;
-			tmp.next = n;
-			tmp.prev = p;
-			n.prev = tmp; 
-			p.next = tmp; 
-			bestBid = tmp; 
-		}
-		/*If bestBid node isn't empty and the order to be added has a lower price than the order in
-		 * the bestBid node, then it is added at the end of the list*/
-		else if(bestBid!=null && o.getPrice() < bestBid.order.getPrice()){
-			currBid = bestBid;
-			while(true){
-				/*if order is bestBid node is not at tail*/
-				if(currBid!=tail){
-					if(o.getPrice()>currBid.order.getPrice()){
-						n = currBid;
-						p = currBid.prev;
-						tmp.next = n; 
-						tmp.prev = p; 
-						n.prev = tmp; 
-						n.next = tmp; 
-						break; 
+		else{
+			/*If bestBid node is null and bestOffer node isn't null
+			 * Then the offer is added before the bestBid*/
+			if(bestBid == null&&bestOffer != null){
+				p = bestOffer;
+				n = bestOffer.next;
+				tmp.next = n; 
+				tmp.prev = p; 
+				p.next = tmp; 
+				n.prev = tmp; 
+				bestBid = tmp; 
+			}
+			/*If bestBid node isn't null and the price of bid to be added is smaller than the order
+			 * in bestBid node, then the order is added above the bestBid node and becomes the best bid.
+			 */
+			else if(bestBid!=null && o.getPrice()>bestBid.order.getPrice()){
+				n = bestBid;
+				p = bestBid.prev;
+				tmp.next = n;
+				tmp.prev = p;
+				n.prev = tmp; 
+				p.next = tmp; 
+				bestBid = tmp; 
+			}
+			/*If bestBid node isn't empty and the order to be added has a lower price than the order in
+			 * the bestBid node, then it is added at the end of the list*/
+			else if(bestBid!=null && o.getPrice() < bestBid.order.getPrice()){
+				currBid = bestBid;
+				while(true){
+					/*if order is bestBid node is not at tail*/
+					if(currBid!=tail){
+						if(o.getPrice()>currBid.order.getPrice()){
+							n = currBid;
+							p = currBid.prev;
+							tmp.next = n; 
+							tmp.prev = p; 
+							n.prev = tmp; 
+							n.next = tmp; 
+							break; 
+						}
+						/*If next node is the tail*/
+						else if(currBid.next==tail){
+							n = tail; 
+							p = tail.prev;
+							tmp.next = n; 
+							tmp.prev = p; 
+							n.prev = tmp; 
+							p.next = tmp;
+							break;
+						}
+						else{
+							currBid = currBid.next; 
+						}
 					}
-					/*If next node is the tail*/
-					else if(currBid.next==tail){
-						n = tail; 
-						p = tail.prev;
-						tmp.next = n; 
-						tmp.prev = p; 
-						n.prev = tmp; 
-						p.next = tmp;
-						break;
-					}
-					else{
-						currBid = currBid.next; 
-					}
+					break;
 				}
-				break;
 			}
 		}
 	}
-	
 
 	///---Removes a node---///
 	private void remove(Node tmp){
@@ -242,6 +244,7 @@ public class OrderBook {
 					add(o);
 				}
 			}
+			System.out.println();
 		}
 		
 		///---Order is of type OfferOrder---///
@@ -322,6 +325,7 @@ public class OrderBook {
 			System.out.println(tmp.order.toString());
 			tmp = tmp.next;
 		}
+		System.out.println();
 	}
 	
 	///---Inner Node class---///
