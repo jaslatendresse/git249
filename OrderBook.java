@@ -241,7 +241,7 @@ public class OrderBook {
 					bestOffer = bestBid.prev;
 				}
 				if(o.getVolume()!=0){
-					add(o);
+					addBid(o);
 				}
 			}
 			System.out.println();
